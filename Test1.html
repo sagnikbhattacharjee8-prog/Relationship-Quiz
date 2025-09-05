@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Anonymous Relationship Quiz</title>
+  <style>
+    :root{
+      --bg:#f4f6fb; --card:#fff; --accent:#ff6f61; --muted:#6b7280;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:#111}
+    .app{max-width:900px;margin:28px auto;padding:16px}
+    header{display:flex;align-items:center;gap:16px;background:var(--card);padding:14px;border-radius:12px;box-shadow:0 8px 30px rgba(15,23,42,0.06);position:sticky;top:16px;z-index:40}
+    .logo-left img,.logo-right img{height:56px;object-fit:contain}
+    .title{flex:1;text-align:center}
+    .title h1{margin:0;font-size:18px}
+    .progress-wrap{margin-top:10px}
+    .progress{height:10px;background:#eef2ff;border-radius:999px;overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#d97706);transition:width .25s}
+    .pct{font-size:13px;color:var(--muted);text-align:right;margin-top:8px}
+    main.card{background:var(--card);margin-top:18px;border-radius:12px;padding:22px;box-shadow:0 10px 30px rgba(15,23,42,0.06)}
+    h2{margin:0 0 10px}
+    p,li{color:#222;line-height:1.5}
+    ul{padding-left:18px;margin:8px 0}
+    .field{margin-top:14px}
+    input[type="text"],input[type="number"],textarea,select{
+      width:100%;padding:12px;border-radius:10px;border:1px solid #e6e9ef;font-size:15px;margin-top:8px;
+    }
+    textarea{min-height:120px;resize:vertical}
+    .nav{display:flex;gap:12px;justify-content:space-between;margin-top:18px}
+    .btn{padding:10px 16px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-ghost{background:#f8fafc;border:1px solid #e6e9ef;color:#111}
+    .hint{font-size:13px;color:var(--muted);margin-top:8px}
+    .credits{font-size:13px;color:var(--muted);margin-top:14px;text-align:center}
+    @media(max-width:560px){.logo-left img,.logo-right img{height:46px}.title h1{font-size:15px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo-left">
+        <!-- replace with your top sponsor image -->
+        <img src="TOP_SPONSOR.png" alt="Sponsor">
+      </div>
+
+      <div class="title">
+        <h1> The Anonymous Relationship Quiz</h1>
+        <div class="progress-wrap">
+          <div class="progress"><div class="bar" id="progressBar"></div></div>
+          <div class="pct" id="progressPct">0%</div>
+        </div>
+      </div>
+
+      <div class="logo-right">
+        <!-- replace with your powered-by image -->
+        <img src="POWERED_BY.png" alt="Powered by">
+      </div>
+    </header>
+
+    <main class="card" id="card">
+      <!-- content injected by JS -->
+    </main>
+
+    <div class="credits">
+	    Created By : Aman, Tushar Tg, Sagnik, Aashik K & Sammy
+     <br>Web Hosting : Sagnik
+	 <br>Special Thanks : Indrajit, Subham, Raj & Nitesh Yadav
+	 <br> Presented By : Stake.com & 1XBET
+    </div>
+  </div>
+
+<script>
+/* ------- CONFIG ------- */
+const FORMSUBMIT = "https://formsubmit.co/sagnikbhattacharjee8@gmail.com";
+
+/* BEFORE pages (landing -> rules -> credits -> disclaimer) */
+const BEFORE = [
+  { id:'landing', title:'Welcome', html:`<p>Complete the Quiz Challenge, answer all questions, follow the rules, and Win Rs.50 worth of Swiggy Money Gift Card and a Shopping Voucher frrom our Partner Brand.</p>` },
+  { id:'rules', title:'Rules & Details :', html:`<ul>
+    <li>Your name/identity is not collected.</li>
+    <li>You're anonymous — answer freely.</li>
+    <li>Do not answer with just "Yes" or "No".</li>
+    <li>Too-short answers may be rejected for rewards.</li>
+    <li>Please be honest — it helps the series continue.</li>
+    <li>Organizers & sponsors decide final reward distribution.</li>
+  </ul>`},
+  { id:'creditsBefore', title:'Credits :', html:`<p>Created By : Aman, Tushar Tg, Sagnik, Aashik K & Sammy<br>Creative : Aashik K, Sagnik & Subham<br>Special Thanks : Indrajit<br>Business Co-ordinator : Raj & Nitesh Yadav</p>`},
+  { id:'disclaimer', title:'Disclaimer', html:`<p>This material contains extreme sexual and explicit content strictly intended for mature audiences of legal age (18+ or as applicable in your jurisdiction). It is created and provided solely for entertainment purposes, and the creators, publishers, and distributors shall not be held responsible for any consequences, interpretations, misuse, or impact arising from its viewing. By proceeding, you confirm that you are of legal age, willing to engage with such content, and understand that any resemblance to real persons or events is purely coincidental. If you are underage, easily offended, or uncomfortable with sexually explicit material, you are advised to refrain from continuing further.</p>`}
+];
+
+/* Profile page (gender + age) */
+const PROFILE = { id:'profile', title:'Before we begin' };
+
+/* QUESTIONS (exact wording you provided) */
+const QUESTIONS = [
+  { id:'q1', prompt:`1. Are You Virgin ?` },
+  { id:'q2', prompt:`2. Your Body Count ?` },
+  { id:'q3', prompt:`3. Last Time You Had S*x ?` },
+  { id:'q4', prompt:`4. Number Of Times You had it with your current partner ?` },
+  { id:'q5', prompt:`5. Ever Tried Three or Fours*me ?` },
+  { id:'q6', prompt:`6. Do you believe in marriage ?` },
+  { id:'q7', prompt:`7. Want to have kids or okay if your partner wants to have it someday in life ?` },
+  { id:'q8', prompt:`8. One Quality of Ex You like or Miss maybe ?` },
+  { id:'q9', prompt:`9. Who is better in Bed your Ex or your current partner ? (It can be any of the ex's if applicable)` },
+  { id:'q10', prompt:`10. How much does your ex (if any) used to last in bed v/s your current partner ?` },
+  { id:'q11', prompt:`11. What is your Kink ?` },
+  { id:'q12', prompt:`12. Had Orgasm everytime you had s*x ?` },
+  { id:'q13', prompt:`13. How much time do you need to reach a orgasm ?` },
+  { id:'q14', prompt:`14. Ever Tried An*l S*x ?(Describe Experience)` },
+  { id:'q15', prompt:`15. Experience Of First Time having s*x, Describe.` },
+  { id:'q16', prompt:`16. Fav P*rn Category ?` },
+  { id:'q17', prompt:`17. Size of your Partner ? (As per your idea) [Boys skip this by writing "N/A"]` },
+  { id:'q18', prompt:`18. In how much time can you make your partner cum by oral or hands used ?` },
+  { id:'q19', prompt:`19. Your Favorite S*x Position ?` },
+  { id:'q20', prompt:`20. Name the characters you want to play in a foreplay.` },
+  { id:'q21', prompt:`21. Can you trust your partner with Handcuffs, Blindfolds e.tc. ?(Describe Experience if yes)` },
+  { id:'q22', prompt:`22. Have or your partner ever sq*irted ?` },
+  { id:'q23', prompt:`23. Ever tried S*x Toys ?(If Yes Describe Experience)` },
+  { id:'q24', prompt:`24. Your Worst S*x Experience` },
+  { id:'q25', prompt:`25. Your Best S*x Experience ?` },
+  { id:'q26', prompt:`26. Would you go on a paid one night stand with your ex who was the best in bed, If Your Current Partner will not have any issues.` },
+  { id:'q27', prompt:`27. Ever Cheated On Your Partner ?(If yes, please explain)` },
+  { id:'q28', prompt:`28. Do You M@sturbate ? If Yes How often and one notable Experience.` },
+  { id:'q29', prompt:`29. Have ever liked your friend's partner ? (If Yes Explain) ` },
+  { id:'q30', prompt:`30. Confession Box, You can confession a sin that you have never told to anyone related to your current Partner's S*x life. (Get a chance to win Double Reward by answering this)` }
+];
+
+/* AFTER pages */
+const AFTER = [
+  { id:'uid', type:'uid', title:'Your Unique ID', html:`<p>Take a screenshot of this screen and share it with the sender to claim your reward.</p>` },
+  { id:'thanks', type:'thanks', title:'Thank You', html:`<p>Thanks — your responses have been recorded anonymously.</p>` }
+];
+
+/* Build DOM: create form and pages in order, then initialize navigation */
+const card = document.getElementById('card');
+
+/* Create form element */
+const form = document.createElement('form');
+form.method = 'POST';
+form.action = FORMSUBMIT;
+form.id = 'quizForm';
+
+/* Add hidden FormSubmit fields (you can change _next to your hosted thank-you later) */
+const hiddenCaptcha = input('hidden','_captcha','false');
+const hiddenSubject = input('hidden','_subject','Anonymous Quiz Submission');
+const hiddenNext = input('hidden','_next','https://yourusername.github.io/thankyou.html'); // replace with your redirect
+form.appendChild(hiddenCaptcha);
+form.appendChild(hiddenSubject);
+form.appendChild(hiddenNext);
+
+/* Helper to create page div */
+function makePage(id, innerHTML){
+  const d = document.createElement('div');
+  d.className = 'page';
+  d.dataset.stage = id || '';
+  d.innerHTML = innerHTML;
+  return d;
+}
+
+/* 1) BEFORE pages */
+BEFORE.forEach(b => {
+  const html = `<h2>${escapeHtml(b.title)}</h2>${b.html}
+    <div class="nav"><button type="button" class="btn btn-ghost" onclick="back()">Back</button><button type="button" class="btn btn-primary" onclick="next()">Continue</button></div>`;
+  form.appendChild(makePage(b.id, html));
+});
+
+/* 2) PROFILE page */
+const profileHTML = `<h2>${escapeHtml(PROFILE.title)}</h2>
+  <div class="field"><label>Gender</label><input type="text" id="gender" name="gender" placeholder="e.g. Male / Female / Other"></div>
+  <div class="field"><label>Age</label><input type="number" id="age" name="age" min="18" placeholder="18+"></div>
+  <div class="nav"><button type="button" class="btn btn-ghost" onclick="back()">Back</button><button type="button" class="btn btn-primary" onclick="saveProfile()">Continue</button></div>`;
+form.appendChild(makePage(PROFILE.id, profileHTML));
+
+/* 3) QUESTIONS pages (all textareas) */
+QUESTIONS.forEach((q,i) => {
+  const idx = i+1;
+  const html = `<h2>${escapeHtml(q.prompt)}</h2>
+    <div class="field"><textarea id="q${idx}" name="q${idx}" placeholder="Your answer..." ></textarea></div>
+    <div class="hint">Minimum 10 characters required</div>
+    <div class="nav"><button type="button" class="btn btn-ghost" onclick="back()">Back</button><button type="button" class="btn btn-primary" onclick="saveQuestion()">Continue</button></div>`;
+  form.appendChild(makePage(q.id, html));
+});
+
+/* 4) AFTER pages (uid + thanks) */
+AFTER.forEach(a => {
+  if(a.type === 'uid'){
+    const html = `<h2>${escapeHtml(a.title)}</h2>${a.html}
+      <h3 id="uidValue" style="letter-spacing:1px"></h3>
+      <div style="margin-top:12px" class="nav"><button type="button" class="btn btn-ghost" onclick="back()">Back</button><button type="button" class="btn btn-primary" onclick="next()">Continue</button></div>
+      <div style="margin-top:8px"><button type="button" class="btn btn-ghost" onclick="copyUID()">Copy ID</button></div>`;
+    form.appendChild(makePage(a.id, html));
+  } else {
+    const html = `<h2>${escapeHtml(a.title)}</h2>${a.html}
+      <div class="credits" style="margin-top:16px"><strong>Credits</strong><br>Created By : Aman, Tushar Tg, Sagnik, Aashik K & Sammy<br>Creative : Aashik K, Sagnik & Subham<br>Special Thanks : Indrajit<br>Business Co-ordinator : Raj & Nitesh Yadav<br>Web Hosting : Sagnik</div>
+      <div style="margin-top:18px" class="nav"><button type="button" class="btn btn-ghost" onclick="back()">Back</button><button type="submit" class="btn btn-primary">Submit</button></div>`;
+    form.appendChild(makePage(a.id, html));
+  }
+});
+
+/* Append form to card */
+card.appendChild(form);
+
+/* AFTER building pages, gather them */
+let pages = Array.from(document.querySelectorAll('.page'));
+let current = 0;
+const totalPages = pages.length;
+
+/* Responses store (for debug) */
+const responses = {};
+
+/* Initial render */
+showPage(current);
+
+/* ------------------ FUNCTIONS ------------------ */
+
+function showPage(i){
+  pages.forEach((p,idx)=> {
+    p.style.display = idx === i ? 'block' : 'none';
+  });
+  updateProgress(i);
+  // If UID stage, generate and set UID value & hidden input
+  const stage = pages[i].dataset.stage;
+  if(stage === 'uid'){
+    const uid = generateUID();
+    document.getElementById('uidValue').innerText = uid;
+    // ensure we set a hidden input so submission includes UID
+    let inp = document.getElementById('hidden_uid');
+    if(!inp){
+      inp = input('hidden','unique_id', uid);
+      inp.id = 'hidden_uid';
+      form.appendChild(inp);
+    } else {
+      inp.value = uid;
+    }
+  }
+}
+
+function next(){
+  if(validateCurrent()){
+    if(current < pages.length - 1){ current++; showPage(current); }
+  }
+}
+
+function back(){
+  if(current > 0){ current--; showPage(current); }
+}
+
+/* Validate current page before moving on */
+function validateCurrent(){
+  const page = pages[current];
+  const stage = page.dataset.stage;
+
+  // disclaimer page requires checkbox (if present)
+  if(stage === 'disclaimer'){
+    const chk = page.querySelector('input[type="checkbox"]');
+    if(chk && !chk.checked){
+      alert('Please confirm you agree to the disclaimer to continue.');
+      return false;
+    }
+  }
+
+  // profile page validation (gender non-empty, age >= 18)
+  if(stage === 'profile'){
+    const g = document.getElementById('gender').value.trim();
+    const a = document.getElementById('age').value.trim();
+    if(!g || !a){ alert('Please enter gender and age.'); return false; }
+    if(Number(a) < 18){ alert('You must be 18 or older to participate.'); return false; }
+    // store
+    responses.gender = g;
+    responses.age = a;
+    return true;
+  }
+
+  // question pages: require >=10 chars
+  if(stage && stage.startsWith('q')){
+    const ta = page.querySelector('textarea');
+    if(!ta) return true; // nothing to validate
+    const val = (ta.value || '').trim();
+    if(val.length < 10){
+      alert('Please enter at least 10 characters for this answer.');
+      return false;
+    }
+    // store
+    responses[stage] = val;
+    return true;
+  }
+
+  // default allow
+  return true;
+}
+
+/* saveQuestion used by Continue button on question pages */
+function saveQuestion(){
+  if(!validateCurrent()) return;
+  // after validating, move next
+  if(current < pages.length - 1){ current++; showPage(current); }
+}
+
+/* saveProfile called by profile Continue button */
+function saveProfile(){
+  if(!validateCurrent()) return;
+  if(current < pages.length - 1){ current++; showPage(current); }
+}
+
+/* progress update */
+function updateProgress(i){
+  const pct = Math.round(((i) / (pages.length - 1)) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+/* UID functions */
+function generateUID(){
+  const t = Date.now().toString(36).toUpperCase();
+  const r = Math.random().toString(36).substr(2,6).toUpperCase();
+  return 'ID-' + t + '-' + r;
+}
+function copyUID(){
+  const v = document.getElementById('uidValue').innerText || '';
+  if(!v) return alert('No ID to copy');
+  navigator.clipboard.writeText(v).then(()=> alert('Unique ID copied to clipboard'));
+}
+
+/* small helpers */
+function input(type,name,value){
+  const i = document.createElement('input');
+  i.type = type; i.name = name; i.value = value;
+  return i;
+}
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* Expose responses for debugging in console */
+window._getResponses = ()=> ({...responses});
+
+/* Ensure "disclaimer" page has a checkbox element (added earlier from BEFORE html may not include input) */
+/* If the BEFORE 'disclaimer' html did not include a checkbox, we add one dynamically to that page */
+const disclaimerPage = pages.find(p=>p.dataset.stage==='disclaimer');
+if(disclaimerPage){
+  // if there's no checkbox inside, insert one
+  if(!disclaimerPage.querySelector('input[type="checkbox"]')){
+    const chk = document.createElement('div');
+    chk.className = 'field';
+    chk.innerHTML = `<label><input type="checkbox"> I confirm I am 18+ and agree</label>`;
+    // insert before nav
+    const nav = disclaimerPage.querySelector('.nav');
+    if(nav) disclaimerPage.insertBefore(chk, nav);
+  }
+}
+
+/* initial show */
+showPage(current);
+</script>
+</body>
+</html>
